@@ -1,0 +1,1 @@
+RESTful API for products and orders. Educational purpose.
