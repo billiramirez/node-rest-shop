@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 
 const Order = require('../models/order');
+const Product =  require('../models/products');
 
 router.get('/',(req, res, next) => {
    Order.find()
@@ -35,12 +36,23 @@ router.get('/',(req, res, next) => {
 });
 
 router.post('/',(req, res, next) => {
-    const order = new Order({
-         _id: mongoose.Types.ObjectId(),
-        quantity: req.body.quantity,
-        product: req.body.productId
-    });
-    order.save()
+    //check if the productId exist in the product document
+    Product.findById(req.body.productId)
+        .then(product => {
+            if(!product){
+                return res.status(404).json({
+                    message: 'Product not found'
+                });
+            }
+            //creating the constructor for the new object to store
+            const order = new Order({
+                _id: mongoose.Types.ObjectId(),
+                quantity: req.body.quantity,
+                product: req.body.productId
+            });
+            return order
+                .save()
+        })
         .then(result => {
             console.log(result);
             res.status(201).json({
@@ -62,7 +74,6 @@ router.post('/',(req, res, next) => {
                 error: err
             });
         });
-
 
 });
 
