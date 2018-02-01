@@ -47,11 +47,10 @@ router.post('/',(req, res, next) => {
             //creating the constructor for the new object to store
             const order = new Order({
                 _id: mongoose.Types.ObjectId(),
-                quantity: req.body.quantity,
-                product: req.body.productId
+                product: req.body.productId,
+                quantity: req.body.quantity
             });
-            return order
-                .save()
+            return order.save();
         })
         .then(result => {
             console.log(result);
@@ -78,17 +77,54 @@ router.post('/',(req, res, next) => {
 });
 
 router.get('/:orderId',(req, res, next) => {
-    res.status(200).json({
-        message: 'Orders details',
-        id:req.params.orderId
-    });
+    Order.findById(req.params.orderId)
+        .select('product orderId quantity')
+        .exec()
+        .then(order => {
+            if(!order) {
+                return res.status(404).json({
+                    message: 'Order not found'
+                })
+            }
+            res.status(200).json({
+                order: order,
+                request: {
+                    type: 'GET',
+                    url: 'http://localhost:3000/orders'
+                }
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: 'Hey an error has ocurred',
+                error: err
+            })
+        });
 });
 
 router.delete('/:orderId',(req, res, next) => {
-    res.status(200).json({
-        message: 'Orders deleted',
-        id:req.params.orderId
-    })
+    Order.remove({_id:req.params.orderId})
+        .exec()
+        .then( result => {
+            res.status(200).json({
+                message: 'order deleted',
+                request: {
+                    type: 'POST',
+                    url: 'http://localhost:3000/orders',
+                    body: {
+                        productId: 'ID',
+                        quantity: 'Number'
+                    }
+                }
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: 'Hey an error has ocurred',
+                error: err
+            })
+        });
+
 });
 
 
