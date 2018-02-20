@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
+const checkAuth = require('../middleware/check-auth');
 
 const storage = multer.diskStorage({
    destination: function(req, file, cb) {
@@ -70,7 +71,7 @@ router.get('/', (req, res, next) => {
 
 
 
-router.post('/', upload.single('productImage'),(req, res, next) => {
+router.post('/', checkAuth, upload.single('productImage'), (req, res, next) => {
 
     const product = new Product({
        _id: new mongoose.Types.ObjectId(),
@@ -134,7 +135,7 @@ router.get('/:productId',(req, res, next) => {
 
 });
 
-router.patch('/:productId',(req, res, next) => {
+router.patch('/:productId', checkAuth, (req, res, next) => {
     const id = req.params.productId;
     const updateOps = {};
     //Iteramos en las propiedades del body para poder actualizar uno o varios campos y no exactamente todos.
@@ -161,7 +162,7 @@ router.patch('/:productId',(req, res, next) => {
 
 });
 
-router.delete('/:productId',(req, res, next) => {
+router.delete('/:productId', checkAuth, (req, res, next) => {
     const id = req.params.productId;
     Product.remove({_id:id})
         .exec()
